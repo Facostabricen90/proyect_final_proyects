@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos</title>
+    <link rel="stylesheet" href="/path/to/your/bootstrap.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">Gestión de Proyectos y Tareas</h1>
+
+        <!-- Sección de Proyectos -->
+        <div class="mt-4" style="margin-left: 50px; margin-right: 50px;">
+            <h2 class="mb-4">Proyectos</h2>
+            <div class="list-group" id="projectList">
+                <% projects.forEach((project) => { %>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="selectProject('<%= project.id %>')">
+                        <%= project.name %>
+                    </a>
+                <% }); %>
+            </div>
+        </div>
+
+        <hr class="my-5"> <!-- Aumenta el margen en Y (arriba y abajo) -->
+
+        <!-- Sección de Tareas -->
+        <h2 class="mt-4 mb-4">Tareas del Proyecto Seleccionado</h2>
+        <div id="taskContainer" class="row">
+            <!-- Aquí se cargarán las tareas mediante JavaScript -->
+        </div>
+    </div>
+
+    <script src="/path/to/your/jquery.js"></script>
+    <script>
+        // Función para seleccionar un proyecto y cargar sus tareas
+        function selectProject(projectId) {
+            $.get(`/projects/${projectId}/tasks`, function (tasks) {
+                $('#taskContainer').empty(); // Limpiar tareas anteriores
+                tasks.forEach(task => {
+                    $('#taskContainer').append(`
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${task.id}. ${task.name}</h5>
+                                    <p class="card-text">${task.done ? "Completado" : "No Completado"}</p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-info btn-sm" onclick="editarTarea(${task.id})">Editar</button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarTarea(${task.id})">Eliminar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+        }
+        function editarTarea(todoId) {
+        $.get(`/todospanel/${todoId}`, function (todo) {
+
+            $('#title').val(todo.title);
+            $('#completed').prop('checked', todo.completed);
+        });
+
+        $('#addTodoForm').attr('action', `/todospanel/${todoId}?_method=PUT`);
+
+        $('button[type="submit"]').text('Editar Tarea');
+    }
+
+    function eliminarTarea(todoId) {
+        if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+            $.ajax({
+                url: `/todospanel/${todoId}`,
+                method: 'DELETE',
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>
